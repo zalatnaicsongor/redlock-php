@@ -10,6 +10,7 @@
     "require": {
         "php": "~5.4",
         "ext-redis": "~2.2.5"
+        "ext-mcrypt": "*"
     },
 
     "autoload": {
