@@ -29,7 +29,7 @@ class RedLock
         ';
 
     /**
-     * @param \Redis[] $servers An array of already connected and authenticated Redis instances
+     * @param array $servers An array of already connected and authenticated Redis or Snc\RedisBundle\Client\Phpredis instances
      * @param int $retryDelay
      * @param int $retryCount
      */
@@ -97,14 +97,18 @@ class RedLock
         if (empty($this->instances)) {
             foreach ($this->servers as $server) {
                 if (!$server instanceof \Redis) {
-                    throw new \InvalidArgumentException("Redis instance expected, got something else");
+                    if (get_class($server) != 'Snc\RedisBundle\Client\Phpredis') {
+                        throw new \InvalidArgumentException(
+                            "Redis or Snc\\RedisBundle\\Client\\Phpredis instance expected, got something else"
+                        );
+                    }
                 }
                 $this->instances[] = $server;
             }
         }
     }
 
-    private function lockInstance(\Redis $instance, $resource, $token, $ttl)
+    private function lockInstance($instance, $resource, $token, $ttl)
     {
         try {
             return $instance->set($resource, $token, ['NX', 'PX' => $ttl]);
@@ -113,7 +117,7 @@ class RedLock
         }
     }
 
-    private function unlockInstance(\Redis $instance, $resource, $token)
+    private function unlockInstance($instance, $resource, $token)
     {
         try {
             return $instance->eval($this->script, [$resource, $token], 1);
@@ -121,7 +125,7 @@ class RedLock
             return false;
         }
     }
-    
+
     public function unlock(array $lock)
     {
         $this->initInstances();
