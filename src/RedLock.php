@@ -97,9 +97,11 @@ class RedLock
         if (empty($this->instances)) {
             foreach ($this->servers as $server) {
                 if (!$server instanceof \Redis) {
-                    if (get_class($server) != 'Snc\RedisBundle\Client\Phpredis') {
+                    if (get_class($server) != 'Snc\RedisBundle\Client\Phpredis\Client') {
                         throw new \InvalidArgumentException(
-                            "Redis or Snc\\RedisBundle\\Client\\Phpredis instance expected, got something else"
+                            "Redis or Snc\\RedisBundle\\Client\\Phpredis\\Client instance expected, got ".get_class(
+                                $server
+                            )
                         );
                     }
                 }
